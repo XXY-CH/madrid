@@ -37,6 +37,18 @@ imsg is a great Swift CLI. We built madrid because we needed things imsg doesn't
 
 imsg is better if you want a native compiled binary, Linux read-only support, or its more polished CLI. Both tools are honest about what they can and can't do.
 
+### Heads up: `csrutil enable --without debug`
+
+Some features (the debugger bridge for typewriter and advanced sends) need you to run this once in recovery mode. It's an official Apple developer exemption that lets a debugger attach to system processes.
+
+You don't need it for anything else in madrid — rich text, HTTP API, MCP, Hermes, typewriter via UI fallback all work without it.
+
+What stays on: filesystem protection, NVRAM, runtime integrity, kext signing. What's exempted: `task_for_pid()` on Apple binaries.
+
+The risk: malware already on your machine could read process memory. But if malware is running, it can keylog anyway. Only on machines you trust. Revert with `csrutil enable` in recovery.
+
+---
+
 ## What it looks like
 
 **Your agent sends Markdown:**
@@ -117,21 +129,11 @@ python3 -m madrid typewriter --to "+14155551212" \
 
 The first frame sends normally. Each subsequent frame edits the message, so the recipient watches the text grow. Uses the bridge if available, falls back to UI scripting otherwise. Fifteen-minute window, roughly one edit per second.
 
-## Security
+## Privacy
 
-**The database is read-only.** madrid never writes to `chat.db`. It opens with `mode=ro` and uses kqueue to detect changes.
-
-**Real sends are gated.** You need `MADRID_ALLOW_REAL_SEND=1` *and* an explicit `--real` flag. No accidental messages.
-
-**The server binds localhost.** `serve` only listens on `127.0.0.1`. Don't expose it.
-
-### About `csrutil enable --without debug`
-
-This is needed only for the debugger bridge (advanced typewriter/send). It's an official Apple developer exemption that allows attaching a debugger to system processes. Everything else in madrid works without it.
-
-What stays on: filesystem protection, NVRAM, runtime integrity, kext signing. What's exempted: `task_for_pid()` on Apple binaries.
-
-The risk is that malware on your machine could read process memory. But if malware is already running, it can keylog regardless. Use on trusted machines only. Revert anytime with `csrutil enable` in recovery mode.
+- `chat.db` is read-only. madrid never writes to it.
+- Real sends need `MADRID_ALLOW_REAL_SEND=1` plus an explicit `--real` flag.
+- `serve` binds `127.0.0.1` only.
 
 ## Layout
 

@@ -52,7 +52,7 @@ imsg 是一个不错的 Swift CLI。我们写 madrid 是因为有些事 imsg 做
 ## 效果
 
 **Agent 发 Markdown：**
-```markdown
+````markdown
 ## 部署完成
 
 | 服务   | 状态 |
@@ -63,7 +63,7 @@ imsg 是一个不错的 Swift CLI。我们写 madrid 是因为有些事 imsg 做
 ```python
 print("hello")
 ```
-```
+````
 
 **iMessage 里看到：**
 - "部署完成" 显示为粗体

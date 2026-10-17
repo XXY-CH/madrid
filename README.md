@@ -52,7 +52,7 @@ The risk: malware already on your machine could read process memory. But if malw
 ## What it looks like
 
 **Your agent sends Markdown:**
-```markdown
+````markdown
 ## Deploy complete
 
 | Service | Status |
@@ -63,7 +63,7 @@ The risk: malware already on your machine could read process memory. But if malw
 ```python
 print("hello")
 ```
-```
+````
 
 **The recipient sees in iMessage:**
 - "Deploy complete" in bold

@@ -172,6 +172,24 @@ def make_handler(eng: engine_mod.Engine) -> type[BaseHTTPRequestHandler]:
                     chat_id = urllib.parse.unquote(path[len("/chats/"):-len("/transcript")])
                     return self._json(self.engine.transcript(chat_id,
                                                              limit=int(q.get("limit", 50))))
+                if path == "/stats":
+                    from madrid import stats as stats_mod
+                    sub = q.get("sub")
+                    if sub == "by-chat":
+                        return self._json(stats_mod.by_chat(limit=int(q.get("limit", 20))))
+                    if sub == "contacts":
+                        return self._json(stats_mod.top_contacts(limit=int(q.get("limit", 10))))
+                    if sub == "daily":
+                        return self._json(stats_mod.daily_volume())
+                    if sub == "media":
+                        return self._json(stats_mod.media_by_type())
+                    return self._json(stats_mod.overview())
+                if path == "/contacts":
+                    from madrid.contacts import ContactResolver, format_handle
+                    cr = ContactResolver()
+                    handles = q.get("handles", "").split(",") if q.get("handles") else []
+                    return self._json({h: {"name": cr.resolve(h), "formatted": format_handle(h)}
+                                       for h in handles if h.strip()})
                 if path == "/real/chats":
                     inbox = realbox.RealInbox()
                     try:

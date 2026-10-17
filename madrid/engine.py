@@ -26,6 +26,19 @@ DEFAULT_DELIVERY = (0.3, 1.4)       # sent -> delivered
 DEFAULT_READ = (1.5, 5.0)           # delivered -> read
 
 
+
+def _stage_attachment(path: str) -> str:
+    """Stage a file into Messages' attachments dir for reliable sending.
+    Files outside that dir can hit sandbox-related send failures."""
+    staged_dir = os.path.expanduser("~/Library/Messages/Attachments/madrid")
+    os.makedirs(staged_dir, exist_ok=True)
+    import shutil
+    dest = os.path.join(staged_dir, os.path.basename(path))
+    if not os.path.exists(dest) or os.path.getsize(dest) != os.path.getsize(path):
+        shutil.copy2(path, dest)
+    return dest
+
+
 class Engine:
     def __init__(self, db_path: str, *, mode: str = "sim", me: str = "me",
                  latency: tuple[float, float] = DEFAULT_LATENCY,
@@ -216,6 +229,8 @@ class Engine:
                 if a.syndication_ranges and rich_rides:
                     continue          # inline card already rode the paste
                 path = (a.url or "").removeprefix("file://") if a.url else None
+                if path and os.path.exists(path) and self.mode == "real":
+                    path = _stage_attachment(path)   # reliable for AppleScript send
                 if path and os.path.exists(path):
                     if target:
                         applescript.send_file(path, to=target)

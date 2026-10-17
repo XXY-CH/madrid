@@ -209,12 +209,28 @@ class Watcher:
 
     # ---- lifecycle -----------------------------------------------------
     def run_forever(self) -> None:
+        """Fast watch: kqueue on chat.db-wal fires poll immediately on write;
+        falls back to interval polling when kqueue is unavailable."""
+        from .fastwatch import FastWatch, watch_sources
+        fw = FastWatch(watch_sources(self.inbox.source))
+        try:
+            fw._setup()
+        except (OSError, AttributeError):
+            fw = None        # no kqueue / file not found → pure polling
+
         while not self._stop.is_set():
             try:
-                self.poll()
+                if fw is not None:
+                    changed = fw.wait(timeout=self.interval)
+                    if changed or self.interval <= 0.1:
+                        self.poll()
+                    # else: no change, skip poll (sub-second latency)
+                else:
+                    self.poll()
             except Exception:
                 pass         # transient sqlite lock / offline db: retry next tick
-            self._stop.wait(self.interval)
+            self._stop.wait(0.05 if fw is not None else self.interval)
+        fw.close() if fw else None
 
     def start(self) -> dict[str, Any]:
         with self._lock:

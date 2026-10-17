@@ -2,6 +2,19 @@
 
 > Renamed from `imsg` to `madrid` (2026-10-14).
 
+## 1.0.0 (2026-10-17)
+- imsg-parity features:
+  - Fast watch: kqueue on chat.db-wal → sub-second event delivery (was 2s poll)
+  - Statistics: overview, per-chat, top contacts, daily volume, media by type
+  - Contact resolution: handle → display name (macOS Contacts + chat.db, cached)
+  - Polls decode: Polls balloon payload → question/options in envelopes
+  - Chat creation: `create-chat` for never-contacted handles
+  - Attachment staging: files auto-staged to ~/Library/Messages/Attachments/ for
+    reliable AppleScript sends
+- CLI: `stats [--by-chat|--top-contacts|--daily|--media]`, `contacts`,
+  `create-chat`
+- HTTP: `GET /stats`, `GET /contacts?handles=`
+
 ## 0.9.0 (2026-10-14)
 - Hermes Agent gateway platform adapter (`integrations/hermes/`): iMessage as
   a first-class Hermes channel via madrid HTTP+SSE — markdown document mode

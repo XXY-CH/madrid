@@ -161,6 +161,16 @@ def build_parser() -> argparse.ArgumentParser:
                    help="no edits: open context menu, report the Edit label, Esc")
     p = sub.add_parser("mark-read", help="real: mark a conversation read (peer-visible if receipts on)")
     p.add_argument("--handle", required=True)
+    p = sub.add_parser("stats", help="statistics over the real chat.db (read-only)")
+    p.add_argument("--by-chat", action="store_true")
+    p.add_argument("--top-contacts", action="store_true")
+    p.add_argument("--daily", action="store_true")
+    p.add_argument("--media", action="store_true")
+    p.add_argument("--limit", type=int, default=20)
+    p = sub.add_parser("contacts", help="resolve handles to contact names")
+    p.add_argument("handles", nargs="+")
+    p = sub.add_parser("create-chat", help="real: open a chat with a new handle (even never contacted)")
+    p.add_argument("handle")
     p = sub.add_parser("real-accounts", help="real: accounts via Messages.app AppleScript")
     p = sub.add_parser("notify", help="send a macOS notification")
     p.add_argument("title")
@@ -292,6 +302,25 @@ def run(ap: argparse.ArgumentParser, argv: list[str]) -> None:
             out(eng.typewriter(a.to, frames, interval=a.interval, format=a.format))
     elif cmd == "mark-read":
         out(applescript.mark_chat_read(a.handle))
+    elif cmd == "stats":
+        from madrid import stats as stats_mod
+        if a.by_chat:
+            out(stats_mod.by_chat(limit=a.limit))
+        elif a.top_contacts:
+            out(stats_mod.top_contacts(limit=a.limit))
+        elif a.daily:
+            out(stats_mod.daily_volume())
+        elif a.media:
+            out(stats_mod.media_by_type())
+        else:
+            out(stats_mod.overview())
+    elif cmd == "contacts":
+        from madrid.contacts import ContactResolver, format_handle
+        cr = ContactResolver()
+        out({h: {"name": cr.resolve(h), "formatted": format_handle(h)} for h in a.handles})
+    elif cmd == "create-chat":
+        subprocess.run(["open", "-g", f"imessage://{a.handle}"], capture_output=True, timeout=10)
+        out({"opened": a.handle, "note": "Messages.app creates the chat; poll real-chats for the guid"})
     elif cmd == "real-accounts":
         out(applescript.account_report())
     elif cmd == "notify":

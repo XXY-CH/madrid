@@ -24,7 +24,7 @@ from . import watch as watch_mod
 
 PROTOCOL_VERSION = "2025-06-18"
 SERVER_NAME = "madrid"
-SERVER_VERSION = "0.9.0"
+SERVER_VERSION = "1.0.0"
 
 DB = os.environ.get("MADRID_DB", os.path.expanduser("~/.madrid/sim.db"))
 ENG = engine.Engine(DB, mode="sim")

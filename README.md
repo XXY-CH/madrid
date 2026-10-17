@@ -36,22 +36,23 @@ madrid takes a different angle — **rich text + agent-first interfaces**. Here'
 | **Receive: edits/retract** | — | ✅ Frame-by-frame + retraction events |
 | **Receive: read receipts** | — | ✅ Live `receipt` events |
 | **Receive: stickers/replies/audio** | Stickers ✅ | ✅ All + played status |
-| **Receive: polls** | ✅ Native decode | — (payload detection only) |
+| **Contact resolution** | ✅ AddressBook + chat.db | ✅ AddressBook + chat.db (cached) |
+| **Receive: polls** | ✅ Native decode | ✅ Question/options decode |
 | **Send: text + files** | ✅ AppleScript (auto-staged) | ✅ AppleScript |
 | **Send: rich text** | Bridge only (SIP off + dylib) | ✅ Pasteboard channel (bold/italic/links/fonts) |
 | **Send: attachments** | ✅ | ✅ |
 | **Send: tapbacks** | ✅ AppleScript | ✅ Sim; bridge for real |
 | **Markdown → rich text** | — | ✅ Tables/code → inline PNG cards |
 | **Typewriter streaming** | — | ✅ Edit-protocol (bridge-first/UI fallback) |
-| **Watch mechanism** | FSEvents + polling fallback | Polling (`mode=ro`, WAL-aware) |
+| **Watch mechanism** | FSEvents + polling fallback | kqueue on WAL + polling fallback |
 | **CLI interface** | ✅ Rich (completions, LLM help) | ✅ JSON output |
 | **JSON-RPC stdio** | ✅ | — |
 | **HTTP/SSE server** | — | ✅ REST + OpenAPI 3.1 + SSE events |
 | **MCP server** | — | ✅ 30+ tools |
 | **TypeScript SDK** | — | ✅ Zero-dependency |
 | **Hermes gateway adapter** | — | ✅ Native platform (slash commands/streaming/allowlist) |
-| **Statistics** | ✅ Message/media counts | — |
-| **Chat creation** | ✅ New handles via IDS check | — |
+| **Statistics** | ✅ Message/media counts | ✅ Overview/by-chat/contacts/daily |
+| **Chat creation** | ✅ New handles via IDS check | ✅ `create-chat` (imessage:// URL) |
 | **Advanced (SIP off)** | Dylib injection (rich send/read/typing/stickers) | Debugger bridge (typewriter/full send) |
 | **License** | MIT | TBD |
 

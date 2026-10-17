@@ -338,6 +338,23 @@ class RealInbox:
             })
         return out
 
+
+    def polls_payload(self, r) -> dict[str, Any] | None:
+        """Decode a Polls balloon payload_data (bplist) → options/votes."""
+        if not r["balloon_bundle_id"] or "Polls" not in (r["balloon_bundle_id"] or ""):
+            return None
+        if not r["payload_data"]:
+            return None
+        raw = self._summary_of(r["payload_data"])
+        if raw.get("_undecodable"):
+            return None
+        # Polls payload is a bplist with question + options structure
+        # (the exact schema varies by macOS version; surface what we can)
+        return {"raw_keys": sorted(k for k in raw.keys() if not k.startswith("$")),
+                "question": raw.get("question") or raw.get("poll-question"),
+                "options": raw.get("options") or raw.get("poll-options") or [],
+                "kind": raw.get("kind", "unknown")}
+
     def _summary_of(self, blob) -> dict[str, Any]:
         """message_summary_info is a binary plist; surface its keys only."""
         if not blob:
@@ -491,6 +508,9 @@ class RealInbox:
         #   history beyond IMMessageEditHistoryLimit (5) is dropped
         if r["date_edited"]:
             env["edits"] = self._edit_info(r)
+        polls = self.polls_payload(r)
+        if polls:
+            env["poll"] = polls
 
         # group / system messages
         if r["group_title"] or r["group_action_type"] or r["is_system_message"]:

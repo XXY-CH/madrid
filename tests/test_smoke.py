@@ -675,7 +675,10 @@ _sock.close(); _httpd.shutdown()
 
 
 # ---- markdown document mode (mixed: runs + inline PNG cards) ---------------
+import plistlib
 from madrid import mddoc
+from madrid import fastwatch as _import_fastwatch
+from madrid import stats as _stats_mod
 
 MD_DOC = ("# 标题\n结论：**Gemini 略胜**。\n\n| A | B |\n|---|---|\n| 1 | 2 |\n\n"
           "```python\nprint(1)\n```\n\n- 甲\n- 乙\n\n> 引用\n\n---\n尾段 [l](https://e.x)")
@@ -891,6 +894,63 @@ st_b = bridge_mod.status()
 check("bridge status reports prerequisites",
       {"lldb", "csrutil_debug_open", "devtools_security", "bridge_resident",
        "ready_to_install"} <= set(st_b), str(st_b))
+
+
+# ---- imsg-parity features: fastwatch, stats, contacts, polls ---------------
+import select as _sel
+
+# fastwatch: kqueue vs fallback
+_src_files = [os.path.join(tempfile.mkdtemp(), "test.db")]
+open(_src_files[0], "w").close()
+_fw = _import_fastwatch.FastWatch(_src_files)
+try:
+    _fw._setup()
+    _has_kqueue = _fw._kq is not None
+except (OSError, AttributeError):
+    _has_kqueue = False
+check("fastwatch kqueue available on macOS", _has_kqueue,
+      "kqueue={}".format(_has_kqueue))
+if _has_kqueue:
+    _fw._teardown()
+
+# fastwatch stat fallback works without kqueue
+_fw2 = _import_fastwatch.FastWatch(_src_files)
+_fw2._kq = None          # force stat path
+_fw2._last_sizes = {}
+import time as _time
+_time.sleep(0.02)
+open(_src_files[0], "a").write("x")
+check("fastwatch stat fallback detects change", _fw2._stat_wait(0.05) is True)
+
+# stats on the synthetic fixture
+if os.path.exists(os.path.expanduser("~/Library/Messages/chat.db")):
+    _import_stats_overview = _stats_mod.overview()
+    check("stats overview has message count",
+          _import_stats_overview.get("total_messages", 0) > 0,
+          str(_import_stats_overview.get("total_messages")))
+    _import_stats_chats = _stats_mod.by_chat(limit=3)
+    check("stats by_chat returns rows", len(_import_stats_chats) > 0)
+    _stats_contacts = _stats_mod.top_contacts(limit=3)
+    check("stats top_contacts returns rows", len(_stats_contacts) > 0)
+
+# contacts: format_handle pretty-prints
+from madrid.contacts import format_handle as _fmt
+check("contacts format (415) 605-7073",
+      _fmt("+14156057073") == "(415) 605-7073", _fmt("+14156057073"))
+check("contacts format 10-digit", _fmt("4156057073") == "(415) 605-7073")
+check("contacts format email passthrough", _fmt("a@b.com") == "a@b.com")
+
+# polls: synthetic payload
+_pdb = sqlite3.connect(FIX_DB)
+_pdb.execute("UPDATE message SET balloon_bundle_id="
+             "'com.apple.messages.MSMessageExtensionBalloonPlugin:0000000000:com.apple.messages.Polls',"
+             " payload_data=? WHERE guid='M-TEXT'",
+             (plistlib.dumps({"question": "Lunch?", "options": ["Pizza", "Sushi"]}),))
+_pdb.commit(); _pdb.close()
+_poll_env = ib.envelope(ib._db.execute(
+    "SELECT * FROM message WHERE guid='M-TEXT'").fetchone(), include_runs=False)
+check("polls decoded in envelope", _poll_env.get("poll", {}).get("question") == "Lunch?",
+      str(_poll_env.get("poll", {}).get("raw_keys")))
 
 
 print()

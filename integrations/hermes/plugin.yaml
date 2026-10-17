@@ -1,0 +1,37 @@
+name: imessage-platform
+label: iMessage (madrid)
+kind: platform
+version: 1.0.0
+description: >
+  iMessage gateway adapter for Hermes Agent, backed by the madrid bridge
+  (github.com/local/madrid). Inbound: SSE stream from madrid serve.
+  Outbound: madrid /send with markdown document mode (rich text + inline
+  PNG cards for tables/code blocks). Supports typewriter streaming via
+  /typewriter, tapbacks, receipts, allowlists, and per-chat sessions.
+author: madrid
+requires_env:
+  - name: MADRID_URL
+    description: "madrid serve base URL"
+    prompt: "madrid URL (default http://127.0.0.1:8787)"
+    password: false
+optional_env:
+  - name: MADRID_ALLOWED_USERS
+    description: "Comma-separated phone/email handles allowed to talk to the bot"
+    prompt: "Allowed users (comma-separated E.164 or email)"
+    password: false
+  - name: MADRID_ALLOW_ALL_USERS
+    description: "Allow any sender (dev only)"
+    prompt: "Allow all users? (true/false)"
+    password: false
+  - name: MADRID_HOME_CHANNEL
+    description: "Default handle for cron / notification delivery"
+    prompt: "Home channel (phone or email)"
+    password: false
+  - name: MADRID_SEND_FORMAT
+    description: "Send format: markdown (default, rich text + card images) | html | plain"
+    prompt: "Send format (markdown/html/plain)"
+    password: false
+  - name: MADRID_TYPEWRITER
+    description: "Stream outgoing replies via edit-frames instead of one message (true/false)"
+    prompt: "Typewriter mode?"
+    password: false

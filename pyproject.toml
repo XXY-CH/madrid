@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "madrid"
+version = "0.3.0"
+description = "iMessage rich-text send/receive bridge for agents (MCP + CLI + watch); stdlib-only Python."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Proprietary" }
+authors = [{ name = "madrid contributors" }]
+keywords = ["imessage", "mcp", "agents", "rich-text"]
+dependencies = []          # stdlib only — deliberate
+
+[project.scripts]
+madrid = "madrid.cli:main"
+
+[tool.setuptools]
+packages = ["madrid"]
+
+[tool.setuptools.package-data]
+madrid = ["native/*.m"]

@@ -1,0 +1,15 @@
+# local analysis artifacts — never commit or distribute
+.research/
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+# local state
+*.db
+.DS_Store
+# tool session data
+*.rep/
+*.gpr

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "madrid"
-version = "0.3.0"
+dynamic = ["version"]
 description = "iMessage rich-text send/receive bridge for agents (MCP + CLI + watch); stdlib-only Python."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -17,6 +17,9 @@ urls = { Homepage = "https://github.com/XXY-CH/madrid", Issues = "https://github
 
 [project.scripts]
 madrid = "madrid.cli:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "madrid.__version__" }
 
 [tool.setuptools]
 packages = ["madrid"]

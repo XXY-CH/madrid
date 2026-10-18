@@ -17,4 +17,4 @@ from .engine import Engine
 
 __all__ = ["Engine", "Message", "Run", "Mention", "Attachment", "State",
            "TAPBACKS", "TEXT_EFFECTS"]
-__version__ = "1.1.1"
+__version__ = "1.2.0"

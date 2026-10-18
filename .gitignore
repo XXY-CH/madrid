@@ -1,16 +1,17 @@
-# local analysis artifacts — never commit or distribute
-.research/
-# python
 __pycache__/
-*.py[cod]
+.DS_Store
+.research/
+.venv/
+*.db
 *.egg-info/
+*.gpr
+*.py[cod]
+*.rep/
+# local analysis artifacts — never commit or distribute
+# local state
+# python
+# tool session data
 build/
 dist/
-.venv/
-# local state
-*.db
-.DS_Store
-# tool session data
-*.rep/
-*.gpr
 tools/madridctl/.build/
+tools/madridui/.build/

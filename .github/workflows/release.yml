@@ -18,6 +18,8 @@ jobs:
           python-version: "3.12"
       - run: pip install -e .
       - run: python3 tests/test_smoke.py
+        env:
+          MADRID_SKIP_REAL_DB: "1"
       - run: python3 integrations/hermes/test_adapter.py
 
   pypi:

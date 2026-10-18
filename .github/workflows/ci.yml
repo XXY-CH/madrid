@@ -32,6 +32,8 @@ jobs:
 
       - name: Smoke tests
         run: python3 tests/test_smoke.py
+        env:
+          MADRID_SKIP_REAL_DB: "1"
 
       - name: Adapter tests
         run: python3 integrations/hermes/test_adapter.py
@@ -56,8 +58,8 @@ jobs:
       - name: Type check
         run: |
           cd sdk/typescript
-          npx tsc --noEmit --strict --target es2020 --module es2020 \
-            --moduleResolution bundler --lib es2020,dom madrid.ts
+          npm install --no-package-lock typescript
+          npx tsc --noEmit
 
   sdk-python:
     name: SDK (Python)

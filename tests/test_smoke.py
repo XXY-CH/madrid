@@ -293,13 +293,15 @@ REAL_DB = os.path.expanduser("~/Library/Messages/chat.db")
 def _real_db_usable():
     if SKIP_REAL_DB:
         return False
+    if not os.path.exists(REAL_DB):
+        return False
     try:
         import sqlite3 as _sq
         _db = _sq.connect(f"file:{REAL_DB}?mode=ro", uri=True)
         _db.execute("SELECT count(*) FROM message").fetchone()
         _db.close()
         return True
-    except Exception:
+    except (Exception, sqlite3.Error):
         return False
 if _real_db_usable():
     try:

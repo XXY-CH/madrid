@@ -80,23 +80,40 @@ print("hello")
 }
 ```
 
-## 快速开始
+## 安装
 
 ```bash
-# 先给终端开完全磁盘访问（系统设置 → 隐私与安全）
+pip install madrid
+```
+
+需要 macOS + Python 3.10+。
+
+给终端开**完全磁盘访问**（系统设置 → 隐私与安全），让 madrid 能读 `chat.db`。
+
+```bash
+python3 -m madrid doctor     # 验证环境
+python3 -m madrid serve --port 8787 --watch   # 启动 API
+```
+
+## 开发者
+
+```bash
+git clone https://github.com/XXY-CH/madrid.git
+cd madrid
 pip install -e .
 
-# 检查环境
-python3 -m madrid doctor
+# 跑测试（CI/容器里加 MADRID_SKIP_REAL_DB=1 跳过真实库）
+python3 tests/test_smoke.py
 
-# 启动 HTTP+SSE 服务（Agent 连这个）
-python3 -m madrid serve --port 8787 --watch
+# 跑 Hermes 适配器测试
+python3 integrations/hermes/test_adapter.py
 
-# 或者直接用 CLI
-python3 -m madrid real-chats
-python3 -m madrid stats
-python3 -m madrid send --to "+14155551212" --text "hello" --real
+# Lint
+pip install ruff && ruff check madrid/
 ```
+
+不需要构建步骤，不需要装依赖。`madrid/native/` 里的 ObjC 工具首次使用时
+自动用 clang 编译。目录结构见下方。欢迎 PR。
 
 ## Hermes 接入
 

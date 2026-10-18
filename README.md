@@ -81,23 +81,41 @@ print("hello")
 }
 ```
 
-## Getting started
+## Install
 
 ```bash
-# Grant Full Disk Access to your terminal first (System Settings → Privacy)
+pip install madrid
+```
+
+That's it. Requires macOS and Python 3.10+.
+
+Grant **Full Disk Access** to your terminal (System Settings → Privacy & Security) so madrid can read `chat.db`.
+
+```bash
+python3 -m madrid doctor     # verify everything works
+python3 -m madrid serve --port 8787 --watch   # start the API
+```
+
+## For developers
+
+```bash
+git clone https://github.com/XXY-CH/madrid.git
+cd madrid
 pip install -e .
 
-# Check everything works
-python3 -m madrid doctor
+# Run tests (skip real-db tests in CI/containers)
+python3 tests/test_smoke.py
 
-# Start the HTTP+SSE server (this is what agents connect to)
-python3 -m madrid serve --port 8787 --watch
+# Run the adapter tests
+python3 integrations/hermes/test_adapter.py
 
-# Or use the CLI directly
-python3 -m madrid real-chats
-python3 -m madrid stats
-python3 -m madrid send --to "+14155551212" --text "hello" --real
+# Lint
+pip install ruff && ruff check madrid/
 ```
+
+No build step needed. No dependencies to install. The ObjC helpers in `madrid/native/` compile themselves with clang the first time they're used.
+
+Project layout is in the [Layout](#layout) section below. PRs welcome.
 
 ## Hermes setup
 

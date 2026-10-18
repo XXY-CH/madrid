@@ -13,3 +13,4 @@ dist/
 # tool session data
 *.rep/
 *.gpr
+tools/madridctl/.build/

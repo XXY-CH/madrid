@@ -953,6 +953,51 @@ check("polls decoded in envelope", _poll_env.get("poll", {}).get("question") == 
       str(_poll_env.get("poll", {}).get("raw_keys")))
 
 
+# ---- JSON-RPC stdio + shell completions + SDKs ------------------------------
+import io as _io
+from madrid import rpc as rpc_mod
+
+_rpc_in = _io.StringIO(
+    json.dumps({"jsonrpc":"2.0","id":1,"method":"system.ping","params":{}}) + "\n"
+    + json.dumps({"jsonrpc":"2.0","id":2,"method":"chats.list","params":{}}) + "\n"
+    + json.dumps({"jsonrpc":"2.0","id":3,"method":"messages.send",
+                  "params":{"chat_id":"chat-+15550001111","text":"rpc hi"}}) + "\n"
+    + json.dumps({"jsonrpc":"2.0","id":99,"method":"bogus.method","params":{}}) + "\n")
+_rpc_out = _io.StringIO()
+_rpc_eng = rpc_mod._build_engine()
+_rpc_eng.open_chat(["+15550001111"])
+# monkey-patch the engine builder
+_orig_build = rpc_mod._build_engine
+rpc_mod._build_engine = lambda: _rpc_eng
+try:
+    rpc_mod.serve(stdin=_rpc_in, stdout=_rpc_out)
+finally:
+    rpc_mod._build_engine = _orig_build
+_rpc_msgs = [json.loads(l) for l in _rpc_out.getvalue().splitlines() if l.strip()]
+_rpc_by = {m.get("id"): m for m in _rpc_msgs}
+check("rpc ping", _rpc_by[1]["result"]["pong"] is True)
+check("rpc chats.list", isinstance(_rpc_by[2]["result"], list))
+check("rpc messages.send", _rpc_by[3]["result"]["text"] == "rpc hi")
+check("rpc unknown method errors", "error" in _rpc_by[99])
+
+# completions
+from madrid.completions import generate as _gen
+for shell in ("bash", "zsh", "fish"):
+    _c = _gen(shell)
+    check(f"completions {shell} generated", len(_c) > 100 and "madrid" in _c)
+check("completions bash has send", "send" in _gen("bash"))
+check("completions zsh has typewriter", "typewriter" in _gen("zsh"))
+
+# SDKs present
+for sdk in ("python", "go", "rust", "typescript"):
+    _sdk_dir = os.path.join(ROOT, "sdk", sdk)
+    _files = os.listdir(_sdk_dir) if os.path.isdir(_sdk_dir) else []
+    check(f"sdk/{sdk} exists", len(_files) > 0, str(_files))
+check("sdk python has Madrid class", "class Madrid" in open(os.path.join(ROOT, "sdk", "python", "madrid.py")).read())
+check("sdk go has package", "package madrid" in open(os.path.join(ROOT, "sdk", "go", "madrid.go")).read())
+check("LICENSE is Apache-2.0", "Apache License" in open(os.path.join(ROOT, "LICENSE")).read()[:50])
+
+
 print()
 if failures:
     print(f"{len(failures)} FAILED: {failures}")

@@ -153,9 +153,12 @@ madrid/           Python 包（零依赖）
   bridge.py       调试器桥（可选，需 SIP 豁免）
   native/         ObjC 辅助工具（首次使用时 clang 编译）
 integrations/hermes/  Hermes 网关插件
+sdk/python/           Python 客户端（标准库）
+sdk/go/               Go 客户端
+sdk/rust/             Rust 客户端
 sdk/typescript/       TypeScript 客户端
 ```
 
 ## License
 
-未定。
+Apache-2.0

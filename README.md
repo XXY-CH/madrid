@@ -151,9 +151,12 @@ madrid/           Python package (no dependencies)
   bridge.py       Debugger bridge (optional, needs SIP exemption)
   native/         ObjC helpers (compiled with clang on first use)
 integrations/hermes/  Hermes gateway plugin
+sdk/python/           Python client (stdlib)
+sdk/go/               Go client
+sdk/rust/             Rust client
 sdk/typescript/       TypeScript client
 ```
 
 ## License
 
-TBD.
+Apache-2.0

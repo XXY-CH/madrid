@@ -171,6 +171,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("handles", nargs="+")
     p = sub.add_parser("create-chat", help="real: open a chat with a new handle (even never contacted)")
     p.add_argument("handle")
+    p = sub.add_parser("completions", help="generate shell completion script")
+    p.add_argument("shell", choices=["bash", "zsh", "fish"])
+    p = sub.add_parser("rpc", help="JSON-RPC 2.0 over stdio (for agents/gateways)")
     p = sub.add_parser("real-accounts", help="real: accounts via Messages.app AppleScript")
     p = sub.add_parser("notify", help="send a macOS notification")
     p.add_argument("title")
@@ -321,6 +324,12 @@ def run(ap: argparse.ArgumentParser, argv: list[str]) -> None:
     elif cmd == "create-chat":
         subprocess.run(["open", "-g", f"imessage://{a.handle}"], capture_output=True, timeout=10)
         out({"opened": a.handle, "note": "Messages.app creates the chat; poll real-chats for the guid"})
+    elif cmd == "completions":
+        from madrid.completions import generate
+        print(generate(a.shell))
+    elif cmd == "rpc":
+        from madrid.rpc import serve
+        serve()
     elif cmd == "real-accounts":
         out(applescript.account_report())
     elif cmd == "notify":

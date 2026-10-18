@@ -8,7 +8,7 @@ version = "0.3.0"
 description = "iMessage rich-text send/receive bridge for agents (MCP + CLI + watch); stdlib-only Python."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "Proprietary" }
+license = { text = "Apache-2.0" }
 authors = [{ name = "madrid contributors" }]
 keywords = ["imessage", "mcp", "agents", "rich-text"]
 dependencies = []          # stdlib only — deliberate

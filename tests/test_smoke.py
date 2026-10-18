@@ -286,8 +286,20 @@ else:
     print("  skip foundation decode (clang missing)")
 
 # Real database, when present: attribute coverage on real blobs.
+# CI runners have an empty chat.db shell — check the table exists too.
 REAL_DB = os.path.expanduser("~/Library/Messages/chat.db")
-if os.path.exists(REAL_DB):
+def _real_db_usable():
+    if not os.path.exists(REAL_DB):
+        return False
+    try:
+        import sqlite3 as _sq
+        _db = _sq.connect(f"file:{REAL_DB}?mode=ro", uri=True)
+        _db.execute("SELECT count(*) FROM message").fetchone()
+        _db.close()
+        return True
+    except Exception:
+        return False
+if _real_db_usable():
     try:
         r = real_format.read_real_db(REAL_DB, limit=3)
         fmts = {b["format"] for b in r["blobs"]}
@@ -302,7 +314,7 @@ else:
     print("  skip real db (absent)")
 
 # CLI verb over the real database
-if os.path.exists(REAL_DB):
+if _real_db_usable():
     p = cli("real-body", "--limit", "1")
     check("cli real-body", p.returncode == 0 and
           json.loads(p.stdout)["blobs"][0]["format"] == "typedstream",
@@ -923,7 +935,7 @@ open(_src_files[0], "a").write("x")
 check("fastwatch stat fallback detects change", _fw2._stat_wait(0.05) is True)
 
 # stats on the synthetic fixture
-if os.path.exists(os.path.expanduser("~/Library/Messages/chat.db")):
+if _real_db_usable():
     _import_stats_overview = _stats_mod.overview()
     check("stats overview has message count",
           _import_stats_overview.get("total_messages", 0) > 0,

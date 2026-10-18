@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Test (Python ${{ matrix.python }})
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install
+        run: pip install -e .
+
+      - name: Lint (ruff)
+        run: |
+          pip install ruff
+          ruff check madrid/ --select E9,F63,F7,F82 --quiet
+        continue-on-error: true
+
+      - name: Smoke tests
+        run: python3 tests/test_smoke.py
+
+      - name: Adapter tests
+        run: python3 integrations/hermes/test_adapter.py
+
+      - name: CLI help
+        run: |
+          python3 -m madrid --help > /dev/null
+          python3 -m madrid doctor > /dev/null
+          python3 -m madrid completions bash > /dev/null
+          python3 -m madrid completions zsh > /dev/null
+          python3 -m madrid completions fish > /dev/null
+          echo '{"jsonrpc":"2.0","id":1,"method":"system.ping"}' | python3 -m madrid rpc
+
+  sdk-typescript:
+    name: SDK (TypeScript)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Type check
+        run: |
+          cd sdk/typescript
+          npx tsc --noEmit --strict --target es2020 --module es2020 \
+            --moduleResolution bundler --lib es2020,dom madrid.ts
+
+  sdk-python:
+    name: SDK (Python)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Import check
+        run: |
+          cd sdk/python
+          python3 -c "from madrid import Madrid; print('ok')"
+
+  package:
+    name: Build package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build sdist + wheel
+        run: |
+          pip install build
+          python3 -m build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
